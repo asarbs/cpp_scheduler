@@ -1,0 +1,9 @@
+[submodule "libs/googletest"]
+	path = libs/googletest
+	url = https://github.com/google/googletest.git
+[submodule "libs/googlemock"]
+	path = libs/googlemock
+	url = https://github.com/google/googlemock.git
+[submodule "libs/logger"]
+	path = libs/logger
+	url = https://github.com/asarbs/cpp_logger.git
