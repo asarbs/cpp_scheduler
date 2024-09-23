@@ -39,8 +39,9 @@ int main() {
     scheduler::Scheduler sch;
     FooTask fooTask;
     FooTask1 fooTask1;
-    sch.registerTask(&fooTask, std::chrono::seconds(1));
-    sch.registerTask(&fooTask1, std::chrono::seconds(2));
+
+    sch.registerTask(&fooTask, 10, std::chrono::seconds(1));
+    sch.registerTask(&fooTask1, 20, std::chrono::seconds(2));
 
     sch.mainloop();
 

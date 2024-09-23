@@ -2,6 +2,7 @@ module;
 
 #include <iostream>
 #include <chrono>
+#include <map>
 #include "logger.h"
 
 export module scheduler;
@@ -26,20 +27,34 @@ namespace scheduler {
 
             }
 
-            void registerTask(Task* task, std::chrono::microseconds period) {
-                __tasks.push_back(TaskConfiguration(task, period));
+            void registerTask(Task* task, uint32_t priority, std::chrono::microseconds period) {
+                __tasks[priority] = TaskConfiguration(task, period);
             }
 
             void mainloop(){
                 uint64_t x = 0;
+                bool exe = false;
                 while(true) {
-                    // logger::logger << logger::debug << "x=" << x << logger::endl;
+                    
                     const std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-                    for(TaskConfiguration& task: __tasks) {
-                        if(now > task.__next_exe_time) {
-                            task.__task->exe();
-                            task.__next_exe_time = now + task.__period;
+                    auto start = std::chrono::high_resolution_clock::now();
+
+                    for(std::map<uint32_t, TaskConfiguration>::iterator itr = __tasks.begin(); itr != __tasks.end(); itr++ ) {
+                        
+                        TaskConfiguration* task = &itr->second;
+                        if(now > task->__next_exe_time) {
+
+                            task->__task->exe();
+                            task->__next_exe_time = now + task->__period;
+                            exe = true;
                         }
+                    }
+                    auto end = std::chrono::high_resolution_clock::now();
+
+                    if(exe) {
+                        std::chrono::duration<double> duration = end - start;
+                        logger::logger << logger::info << "Czas wykonania funkcji:" << duration.count() << " sekund" << logger::endl;
+                        exe = false;
                     }
                     x++;
                 }
@@ -49,16 +64,25 @@ namespace scheduler {
 
         private:
             struct TaskConfiguration {
+                    TaskConfiguration(): __task(NULL), __period(0), __next_exe_time(std::chrono::system_clock::now()) {
+
+                    }
                     TaskConfiguration(Task* task, const std::chrono::microseconds period): __task(task), __period(period), __next_exe_time(std::chrono::system_clock::now()) {
 
                     }
+                    TaskConfiguration& operator=(const TaskConfiguration& other) {
+                        this->__task = other.__task;
+                        this->__period = other.__period;
+                        this->__next_exe_time = other.__next_exe_time;
+                        return *this;
+                    }
 
                     Task* __task;
-                    const std::chrono::microseconds __period;
+                    std::chrono::microseconds __period;
                     std::chrono::time_point<std::chrono::system_clock> __next_exe_time;
             };
 
-            std::vector<TaskConfiguration> __tasks;
+            std::map<uint32_t, TaskConfiguration> __tasks;
 
     };
 
