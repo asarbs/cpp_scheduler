@@ -23,8 +23,10 @@ namespace scheduler {
 
     class Scheduler {
         public:
-            Scheduler(){
+            Scheduler(): __time_frame(std::chrono::seconds(2)){
+            }
 
+            Scheduler(std::chrono::duration<double> time_frame): __time_frame(time_frame){
             }
 
             void registerTask(Task* task, uint32_t priority, std::chrono::microseconds period) {
@@ -32,7 +34,7 @@ namespace scheduler {
             }
 
             void mainloop(){
-                uint64_t x = 0;
+                // uint64_t x = 0;
                 bool exe = false;
                 while(true) {
                     
@@ -47,16 +49,21 @@ namespace scheduler {
                             task->__task->exe();
                             task->__next_exe_time = now + task->__period;
                             exe = true;
+                            auto end = std::chrono::high_resolution_clock::now();
+                            std::chrono::duration<double> duration = end - start;
+                            if(duration > __time_frame) {
+                                logger::logger << logger::warning << "Task execution time [" << duration.count() << "s] exceeds time frame " << __time_frame.count() << "s." << logger::endl;
+                            }
                         }
                     }
                     auto end = std::chrono::high_resolution_clock::now();
 
                     if(exe) {
                         std::chrono::duration<double> duration = end - start;
-                        logger::logger << logger::info << "Czas wykonania funkcji:" << duration.count() << " sekund" << logger::endl;
+                        current_time = alpha * duration + (1 - alpha)*current_time;
                         exe = false;
                     }
-                    x++;
+                    // x++;
                 }
             }
 
@@ -83,7 +90,9 @@ namespace scheduler {
             };
 
             std::map<uint32_t, TaskConfiguration> __tasks;
-
+            const std::chrono::duration<double> __time_frame;
+            std::chrono::duration<double> current_time;
+            const double alpha = 0.1;
     };
 
 };

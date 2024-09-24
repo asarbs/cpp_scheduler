@@ -13,7 +13,7 @@ else
 Q ?= @
 endif
 
-GCC = clang++-16
+GCC = clang++-18
 USER_DIR=./test_src
 
 TARGET_NAME := app
@@ -24,14 +24,17 @@ CPPFLAGS_PROD :=
 prof: CPPFLAGS_PROD += -pg
 CPPFLAGS_PROD += -g 
 # CPPFLAGS_PROD += -isystem 
-# CPPFLAGS_PROD += -Wall 
+CPPFLAGS_PROD += -Wall 
+CPPFLAGS_PROD += -pedantic
 # CPPFLAGS_PROD += -pthread 
 # CPPFLAGS_PROD += -lpthread 
-CPPFLAGS_PROD += -std=c++20 
+CPPFLAGS_PROD += -std=c++20
 CPPFLAGS_PROD += -fpermissive
 CPPFLAGS_PROD += -ferror-limit=1
 CPPFLAGS_PROD += -fmodules
 CPPFLAGS_PROD += -fprebuilt-module-path=.
+# CPPFLAGS_PROD += -v
+# CPPFLAGS_PROD += -E
 
 CXXFLAGS := -g -Wall -Wextra -pthread
 CPPFLAGS_TEST := -g -Wall -Wextra -pthread -isystem $(GTEST_DIR)/include
@@ -72,8 +75,19 @@ test: INCLUDES += libs/googletest/googletest/include/
 INCLUDES += .
 INCLUDES_PARAMS=$(foreach d, $(INCLUDES), -I"${PWD}/$d")
 
+INCLUDES_PARAMS += -I"/usr/include/clang/18/"
+INCLUDES_PARAMS += -I"/usr/include/x86_64-linux-gnu/c++/11/"
+INCLUDES_PARAMS += -I"/usr/include/c++/11/"
+
+
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
                 $(GTEST_DIR)/include/gtest/internal/*.h
+
+.setup:
+	$(Q) wget https://apt.llvm.org/llvm.sh
+	$(Q) chmod 777 llvm.sh
+	$(Q) ./llvm.sh
+	$(Q) rm llvm.sh*
 
 gtest-all.o : $(GTEST_SRCS_)
 	@echo 'Build file: $< -> $@'
