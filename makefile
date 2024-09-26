@@ -14,7 +14,13 @@ Q ?= @
 endif
 
 GCC = clang++-18
-USER_DIR=./test_src
+FORMATTER = clang-format
+
+PROJECT_DIR := ${PWD}
+SOURCES_DIR := ${PROJECT_DIR}
+TEST_DIR=./test_src
+
+FIND_CMD = find ${SOURCES_DIR} \( -iname *.h -o -iname *.cpp -o -iname *.cppm \) -and ! -path "*/libs/*"
 
 TARGET_NAME := app
 prof: TARGET_NAME := prof_app
@@ -143,6 +149,11 @@ prof: build
 	$(Q)./$(TARGET_NAME) 
 	$(Q)gprof ./$(TARGET_NAME) gmon.out > analysis.txt
 
+format-check:
+	${Q}$(FIND_CMD) | xargs $(FORMATTER) --Werror --dry-run --verbose
+
+format:
+	${Q}$(FIND_CMD) | xargs $(FORMATTER) --Werror -i --verbose
 
 valgrind: build
 	@echo "Valgrind: $(TARGET_NAME)"

@@ -4,18 +4,7 @@ FROM debian
 USER root
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get install -y bash
-RUN apt-get install -y bash-completion
-RUN apt-get install -y python3
-RUN apt-get install -y python3-django
-RUN apt-get install -y python3-pip
-RUN apt-get install -y git
-RUN apt-get install -y python3-bs4
-RUN apt-get install -y sqlite3
-RUN apt-get install -y wget
-RUN apt-get install -y lsb-release
-RUN apt-get install -y software-properties-common 
-RUN apt-get install -y gnupg
+RUN apt-get install -y bash bash-completion python3 python3-django python3-pip git python3-bs4 sqlite3 wget lsb-release software-properties-common gnupg clang-format
 
 SHELL ["/bin/bash", "-c"]
 
